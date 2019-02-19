@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css?family=Sawarabi+Gothic" rel="stylesheet">
+  <style>
+    body {
+      margin: 8px 12px;
+      background-color: #36393F;
+    }
+    h2, h3 {
+      color: #FFFFE1;
+      font-weight: normal;
+      text-align: center;
+    }
+    * {
+      font-family: "Sawarabi Gothic";
+    }
+    #text-input, 
+    #analysis-result {
+      position: absolute;
+      width: calc(100vw - 48px);
+      height: calc(100vh - 108px);
+      font-size: 18px;
+      border-radius: 5px;
+    }
+    #text-input {
+      color: #FFFFFF;
+      background: none;
+      padding: 12px;
+      z-index: 2;
+      cursor: text;
+      resize: none;
+      border: none;
+      outline:0px !important;
+    }
+    #analysis-result {
+      color: #484B52;
+      background: #484B52;
+      padding: 12px;
+      z-index: 1;
+    }
+    #paraphrase-container {
+      color: #FFFFFF;
+      position: fixed;
+      display: flex;
+      z-index: 3;
+    }
+    .paraphrase {
+      margin: 4px;
+      border-radius: 5px;
+      border: 1px solid #25272B;
+    }
+    .paraphrase > .title,
+    .paraphrase > .content {
+      padding: 6px;
+      white-space: pre;
+    }
+    .paraphrase > .title{
+      background-color: #202225;
+    }
+    .paraphrase > .footer,
+    .paraphrase > .content {
+      background-color: #2F3136;
+    }
+    .paraphrase > .footer{
+      color: #ACACAF;
+      font-size: 12px;
+      padding: 0 8px 6px 8px;
+    }
+    [id^=highlight-] {
+      border-bottom: 3px #43B581 dashed;
+    }
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <h2 id="loading-icon">読み込み中...</h2>
+  <div id="main-content" class="hidden">
+    <h3 id="loading-icon" style="margin:0 0 8px 0;">大人の語彙力！言葉使いの簡単変換</h3>
+    <textarea id="text-input" class="form-input" autofocus placeholder="#ここに文章を入力してください。"></textarea>
+    <div id="analysis-result" class="form-input"></div>
+  </div>
+  <div id="paraphrase-container">
+    <div id="paraphrase-template" class="paraphrase hidden">
+      <div class="title"></div>
+      <div class="content"></div>
+      <div class="footer">Alt + 数字キーで言い換える</div>
+    </div>
+  </div>
+</body>
+</html>

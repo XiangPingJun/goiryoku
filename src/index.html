@@ -2,92 +2,130 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
   <link href="https://fonts.googleapis.com/css?family=Sawarabi+Gothic" rel="stylesheet">
   <style>
     body {
-      margin: 8px 12px;
+      margin: 8px 8px;
       background-color: #36393F;
     }
-    h2, h3 {
+    .page-title {
       color: #FFFFE1;
-      font-weight: normal;
-      text-align: center;
+      font-size: 20px;
+      margin: 0 6px 6px 6px;
+    }
+    .note{
+      color: #ACACAF;
+      font-size: 12px;
     }
     * {
       font-family: "Sawarabi Gothic";
     }
-    #text-input, 
-    #analysis-result {
+    .text-input, 
+    .analysis-result {
+      padding: 8px;
       position: absolute;
       width: calc(100vw - 48px);
       height: calc(100vh - 108px);
       font-size: 18px;
       border-radius: 5px;
     }
-    #text-input {
+    .text-input {
       color: #FFFFFF;
       background: none;
-      padding: 12px;
       z-index: 2;
       cursor: text;
       resize: none;
       border: none;
       outline:0px !important;
     }
-    #analysis-result {
+    .analysis-result {
       color: #484B52;
       background: #484B52;
-      padding: 12px;
       z-index: 1;
     }
-    #paraphrase-container {
+    .analysis-result-text {
+      white-space: pre;
+    }
+    .paraphrase-container {
       color: #FFFFFF;
       position: fixed;
+    }
+    .paraphrase-container {
       display: flex;
-      z-index: 3;
+      z-index: 4;
     }
     .paraphrase {
       margin: 4px;
       border-radius: 5px;
       border: 1px solid #25272B;
     }
-    .paraphrase > .title,
-    .paraphrase > .content {
+    .paraphrase-title,
+    .paraphrase-content {
       padding: 6px;
       white-space: pre;
     }
-    .paraphrase > .title{
+    .paraphrase-title{
       background-color: #202225;
     }
-    .paraphrase > .footer,
-    .paraphrase > .content {
+    .paraphrase-content {
       background-color: #2F3136;
     }
-    .paraphrase > .footer{
-      color: #ACACAF;
-      font-size: 12px;
-      padding: 0 8px 6px 8px;
+    .candidate:hover {
+      cursor: pointer;
+      text-decoration: underline;
     }
-    [id^=highlight-] {
+    .highlight {
       border-bottom: 3px #43B581 dashed;
     }
-    .hidden {
-      display: none !important;
+    .menu {
+      font-size: 14px;
+      margin: 6px 0;
+    }
+    .menu-option {
+      background-color: #3D414F;
+      color: #7280B2;
+      cursor: pointer;
+      margin-right: 6px;
+      padding: 0 6px;
+      border-radius: 3px;
+    }
+    [v-cloak] {
+      display: none;
     }
   </style>
+  <title>語彙力！大人の言葉使いを簡単変換</title>
 </head>
 <body>
-  <h2 id="loading-icon">読み込み中...</h2>
-  <div id="main-content" class="hidden">
-    <h3 id="loading-icon" style="margin:0 0 8px 0;">大人の語彙力！言葉使いの簡単変換</h3>
-    <textarea id="text-input" class="form-input" autofocus placeholder="#ここに文章を入力してください。"></textarea>
-    <div id="analysis-result" class="form-input"></div>
-  </div>
-  <div id="paraphrase-container">
-    <div id="paraphrase-template" class="paraphrase hidden">
-      <div class="title"></div>
-      <div class="content"></div>
-      <div class="footer">Alt + 数字キーで言い換える</div>
+  <div id='app' v-cloak>
+    <div v-if="!ready" class="page-title">読み込み中...</div>
+    <div v-if="ready">
+      <div class="page-title">
+        語彙力！大人の言葉使いを簡単変換
+        <span class="note">Alt + 数字キーでメニュー操作</span>
+      </div>
+      <div class="menu">
+        <span v-if="!subMenuOptions" v-for="(category, i) in Object.keys(dictionary)" @click="activeSubMenuIndex = i" class="menu-option">{{`${(i + 1).toString(36)}> ${category}`}}</span>
+        <span v-for="(option, i) in subMenuOptions" @click="applyKeyword(i)" class="menu-option">{{`${(i + 1).toString(36)}> ${option}`}}</span>
+        <span v-if="subMenuOptions" @click="activeSubMenuIndex = null" class="menu-option">{{`${(subMenuOptions.length + 1).toString(36)}> (←前に戻る)`}}</span>
+      </div>
+
+      <textarea v-model="inputText" ref="textInput" placeholder="#ここに文章を入力してください。" @click="handleParaphraseBox" @keydown="onTextBoxKey" autofocus class="text-input"></textarea>
+      <div class="analysis-result" ref="analysisResult">
+        <span v-for="token in inputTokens">
+          <span v-if="'highlight' === token.type" ref="highlight" class="highlight">{{token.text}}</span>
+          <span v-else class="analysis-result-text">{{token.text}}</span>
+        </span>
+      </div>
+
+      <div class="paraphrase-container" :style="paraphrasesContainerStyle">
+        <div v-for="paraphrase in activeParaphrases" class="paraphrase">
+          <div class="paraphrase-title">{{paraphrase.title}}</div>
+          <div class="paraphrase-content">
+            <div v-for="(candidate, i) in paraphrase.candidates" @click="applyRestatement(i)" class="candidate">{{candidate}}</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </body>

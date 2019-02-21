@@ -110,7 +110,7 @@
         <span v-if="subMenuOptions" @click="activeSubMenuIndex = null" class="menu-option">{{`${(subMenuOptions.length + 1).toString(36)}> (←前に戻る)`}}</span>
       </div>
 
-      <textarea v-model="inputText" ref="textInput" placeholder="#ここに文章を入力してください。" @click="handleParaphraseBox" @keydown="onTextBoxKey" autofocus class="text-input"></textarea>
+      <textarea v-model="inputText" ref="textInput" placeholder="#ここに文章を入力してください。" @click="handleParaphraseBox" autofocus class="text-input"></textarea>
       <div class="analysis-result" ref="analysisResult">
         <span v-for="token in inputTokens">
           <span v-if="'highlight' === token.type" ref="highlight" class="highlight">{{token.text}}</span>

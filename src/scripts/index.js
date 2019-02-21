@@ -20,6 +20,10 @@ new Vue({
 			this.ready = true
 			tokenizer = kuromojiTokenizer
 		})
+		document.addEventListener('keydown', this.onKeyDown)
+	},
+	beforeDestroy() {
+		document.removeEventListener('keydown', this.onKeyDown)
 	},
 	watch: {
 		inputText() {
@@ -28,17 +32,10 @@ new Vue({
 		},
 	},
 	computed: {
-		dictionary() {
-			let dict = { ...dictionary }
-			for (let category in dict)
-				for (let i in dict[category])
-					dict[category][i].keywords = dict[category][i].rawKeywords.map(keyword => tokenizer.tokenize(keyword)[0]).map(this.basicFormPronunciation)
-			return dict
-		},
 		subMenuOptions() {
 			if (null == this.activeSubMenuIndex)
 				return null
-			return this.dictionary[Object.keys(this.dictionary)[this.activeSubMenuIndex]].map(item => item.rawKeywords.join(','))
+			return dictionary[Object.keys(dictionary)[this.activeSubMenuIndex]].map(item => item.keywords[0])
 		},
 		activeParaphrases() {
 			if (!this.paraphraseTable || !this.paraphraseTable[this.cursorPosition])
@@ -59,9 +56,12 @@ new Vue({
 			this.activeParaphrases.forEach(paraphrase => restatements = [...restatements, ...paraphrase.restatements])
 			return restatements
 		},
+		dictionary() {
+			return dictionary
+		},
 	},
 	methods: {
-		onTextBoxKey(event) {
+		onKeyDown(event) {
 			if (event.code.match(/^Arrow/)) {
 				this.handleParaphraseBox()
 			} else if (event.altKey) {
@@ -75,7 +75,7 @@ new Vue({
 				} else if (this.subMenuOptions) {
 					if (index === this.subMenuOptions.length) {
 						this.activeSubMenuIndex = null
-					} else if (this.subMenuOptions[index]) {
+					} else {
 						this.applyKeyword(index)
 					}
 				} else if (Object.keys(dictionary)[index]) {
@@ -84,14 +84,19 @@ new Vue({
 			}
 		},
 		async applyKeyword(index) {
+			if (!this.subMenuOptions[index])
+				return
 			const leftPart = this.inputText.substr(0, this.cursorPosition)
 			const rightPart = this.inputText.substr(this.cursorPosition)
-			this.inputText = `${leftPart}${this.subMenuOptions[index].split(',')[0]}${rightPart}`
+			this.inputText = `${leftPart}${this.subMenuOptions[index]}${rightPart}`
+			this.activeSubMenuIndex = null
 			await new Promise(resolve => setTimeout(resolve))
 			this.$refs.textInput.focus()
 			this.$refs.textInput.selectionEnd = this.cursorPosition
 		},
 		async applyRestatement(index) {
+			if (!this.activeRestatements[index])
+				return
 			const paraphrase = this.activeParaphrases[0]
 			const leftPart = this.inputText.substr(0, paraphrase.position + paraphrase.text.length)
 			const rightPart = this.inputText.substr(paraphrase.position + paraphrase.text.length)
@@ -123,15 +128,16 @@ new Vue({
 			this.paraphraseTable = []
 			this.inputTokens = []
 			let highlightCount = 0
-			tokenizer.tokenize(this.inputText)
 			tokenizer.tokenize(this.inputText).forEach(token => {
 				let paraphraseFound = false
 				if ('助動詞' !== token.pos && '助詞' !== token.pos) {
-					for (let category in this.dictionary) {
-						for (let i in this.dictionary[category].filter(item => -1 !== item.keywords.indexOf(this.basicFormPronunciation(token)))) {
+					for (let category in dictionary) {
+						for (let i in dictionary[category]) {
+							if (!dictionary[category][i].keywords.find(keyword => -1 !== keyword.indexOf(token.basic_form)))
+								continue
 							paraphraseFound = true
 							const paraphrase = {
-								...this.dictionary[category][i],
+								...dictionary[category][i],
 								text: token.surface_form,
 								position: token.word_position - 1,
 								highlightIndex: highlightCount,

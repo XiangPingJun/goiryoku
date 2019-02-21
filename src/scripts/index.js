@@ -160,10 +160,17 @@ new Vue({
 					})
 					highlightCount++
 				} else {
-					this.inputTokens.push({
-						type: 'text',
-						text: token.surface_form,
-					})
+					for (let i in token.surface_form) {
+						if (' ' == token.surface_form[i])
+							this.inputTokens.push({ type: 'space' })
+						else if ('\n' == token.surface_form[i])
+							this.inputTokens.push({ type: 'line-break' })
+						else
+							this.inputTokens.push({
+								type: 'text',
+								text: token.surface_form[i],
+							})
+					}
 				}
 			})
 		},

@@ -26,7 +26,7 @@ new Vue({
 		document.removeEventListener('keydown', this.onKeyDown)
 	},
 	watch: {
-		inputText() {
+		inputText(val) {
 			this.analysis()
 			this.handleParaphraseBox()
 		},
@@ -63,6 +63,11 @@ new Vue({
 		},
 		dictionary() {
 			return dictionary
+		},
+		inputTextHeight() {
+			const lineCount = this.inputText.split('\n').length
+			const height = Math.max(364, 26 * lineCount)
+			return height + 'px'
 		},
 		isPC() {
 			return !mobileAndTabletcheck()

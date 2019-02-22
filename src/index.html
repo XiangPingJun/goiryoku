@@ -26,8 +26,8 @@
     .analysis-result {
       padding: 8px;
       position: absolute;
-      width: calc(100vw - 32px);
-      height: calc(100vh - 100px);
+      width: calc(100% - 36px);
+      min-height: 364px; 
       font-size: 18px;
       border-radius: 5px;
     }
@@ -115,7 +115,7 @@
         </span>
       </div>
 
-      <textarea v-model="inputText" ref="textInput" placeholder="#ここに文章を入力してください。" @click="handleParaphraseBox" autofocus class="text-input"></textarea>
+      <textarea v-model="inputText" ref="textInput" placeholder="#ここに文章を入力してください。" @click="handleParaphraseBox" autofocus class="text-input" :style="{height: inputTextHeight}"></textarea>
       <div class="analysis-result" ref="analysisResult">
         <span v-for="token in inputTokens">
           <span v-if="'highlight' === token.type" ref="highlight" class="highlight">{{token.text}}</span>
@@ -123,6 +123,7 @@
           <br v-else-if="'line-break' === token.type"/>
           <span v-else>{{token.text}}</span>
         </span>
+        &nbsp;
       </div>
 
       <div class="paraphrase-container" :style="paraphrasesContainerStyle">

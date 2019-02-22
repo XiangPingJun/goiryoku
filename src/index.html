@@ -5,22 +5,32 @@
   <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=0' >
   <script src="https://cdn.jsdelivr.net/npm/vue"></script>
   <link href="https://fonts.googleapis.com/css?family=Sawarabi+Gothic" rel="stylesheet">
+  <link href="public/fontawesome/css/fontawesome-all.css" rel="stylesheet">
   <style>
     body {
       margin: 8px 8px;
       background-color: #36393F;
     }
+    * {
+      font-family: "Sawarabi Gothic";
+    }
     .page-title {
       color: #FFFFE1;
       font-size: 20px;
-      margin: 0 6px 6px 6px;
+      margin: 0 12px 6px 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .link {
+      color: #7280B2;
+      cursor: pointer;
+    }
+    .link:hover {
+      color: #1490CA;
     }
     .note{
       color: #ACACAF;
       font-size: 12px;
-    }
-    * {
-      font-family: "Sawarabi Gothic";
     }
     .text-input, 
     .analysis-result {
@@ -48,9 +58,8 @@
     .paraphrase-container {
       color: #FFFFFF;
       position: fixed;
-    }
-    .paraphrase-container {
       display: flex;
+      align-items: flex-start;
       z-index: 4;
     }
     .paraphrase {
@@ -69,10 +78,6 @@
     .paraphrase-content {
       background-color: #2F3136;
     }
-    .candidate:hover {
-      cursor: pointer;
-      text-decoration: underline;
-    }
     .highlight {
       border-bottom: 3px #43B581 dashed;
     }
@@ -83,11 +88,14 @@
     }
     .menu-option {
       background-color: #3D414F;
-      color: #7280B2;
       cursor: pointer;
       margin-right: 6px;
       padding: 0 6px;
       border-radius: 3px;
+    }
+    .loading{
+      color: #ACACAF;
+      margin-left: 6px;
     }
     [v-cloak] {
       display: none;
@@ -97,20 +105,23 @@
 </head>
 <body>
   <div id='app' v-cloak>
-    <div v-if="!ready" class="page-title">読み込み中...</div>
-    <div v-if="ready">
-      <div class="page-title">
-        語彙力！大人の言葉使いを簡単変換
-        <span v-if="isPC" class="note">Alt + 数字キーでメニュー操作</span>
+    <div class="page-title">
+      <div>
+        <i class="fas fa-book"></i> 語彙力！大人の言葉使いを簡単変換
+        <span v-if="ready && isPC" class="note"><i class="fas fa-keyboard"></i> Alt + 数字キーでメニュー操作</span>
       </div>
+      <div class="link"><i class="fab fa-github"></i> Github</div>
+    </div>
+    <div v-if="!ready" class="loading"><i class="fas fa-spinner fa-spin"></i> 読み込み中...</div>
+    <div v-if="ready">
       <div class="menu">
-        <span v-if="!subMenuOptions" v-for="(category, i) in Object.keys(dictionary)" @click="activeSubMenuIndex = i" class="menu-option">
+        <span v-if="!subMenuOptions" v-for="(category, i) in Object.keys(dictionary)" @click="activeSubMenuIndex = i" class="menu-option link">
           <span v-if="isPC">{{(i + 1).toString(36)}}</span><span>> {{category}}</span>
         </span>
-        <span v-for="(option, i) in subMenuOptions" @click="applyKeyword(i)" class="menu-option">
+        <span v-for="(option, i) in subMenuOptions" @click="applyKeyword(i)" class="menu-option link">
           <span v-if="isPC">{{(i + 1).toString(36)}}</span><span>> {{option}}</span>
         </span>
-        <span v-if="subMenuOptions" @click="activeSubMenuIndex = null" class="menu-option">
+        <span v-if="subMenuOptions" @click="activeSubMenuIndex = null" class="menu-option link">
           <span v-if="isPC">{{(subMenuOptions.length + 1).toString(36)}}</span><span>> (←前に戻る)</span>
         </span>
       </div>
@@ -130,7 +141,7 @@
         <div v-for="paraphrase in activeParaphrases" class="paraphrase">
           <div class="paraphrase-title">{{paraphrase.title}}</div>
           <div class="paraphrase-content">
-            <div v-for="(candidate, i) in paraphrase.candidates" @click="applyRestatement(i)" class="candidate">
+            <div v-for="(candidate, i) in paraphrase.candidates" @click="applyRestatement(i)" class="candidate link">
               <span v-if="isPC">{{(candidate.index + 1).toString(36)}}</span><span>> {{candidate.text}}</span>
             </div>
           </div>

@@ -79,6 +79,7 @@
     .menu {
       font-size: 14px;
       margin: 6px 0;
+      line-height: 24px;
     }
     .menu-option {
       background-color: #3D414F;
@@ -100,12 +101,18 @@
     <div v-if="ready">
       <div class="page-title">
         語彙力！大人の言葉使いを簡単変換
-        <span class="note">Alt + 数字キーでメニュー操作</span>
+        <span v-if="isPC" class="note">Alt + 数字キーでメニュー操作</span>
       </div>
       <div class="menu">
-        <span v-if="!subMenuOptions" v-for="(category, i) in Object.keys(dictionary)" @click="activeSubMenuIndex = i" class="menu-option">{{`${(i + 1).toString(36)}> ${category}`}}</span>
-        <span v-for="(option, i) in subMenuOptions" @click="applyKeyword(i)" class="menu-option">{{`${(i + 1).toString(36)}> ${option}`}}</span>
-        <span v-if="subMenuOptions" @click="activeSubMenuIndex = null" class="menu-option">{{`${(subMenuOptions.length + 1).toString(36)}> (←前に戻る)`}}</span>
+        <span v-if="!subMenuOptions" v-for="(category, i) in Object.keys(dictionary)" @click="activeSubMenuIndex = i" class="menu-option">
+          <span v-if="isPC">{{(i + 1).toString(36)}}</span><span>> {{category}}</span>
+        </span>
+        <span v-for="(option, i) in subMenuOptions" @click="applyKeyword(i)" class="menu-option">
+          <span v-if="isPC">{{(i + 1).toString(36)}}</span><span>> {{option}}</span>
+        </span>
+        <span v-if="subMenuOptions" @click="activeSubMenuIndex = null" class="menu-option">
+          <span v-if="isPC">{{(subMenuOptions.length + 1).toString(36)}}</span><span>> (←前に戻る)</span>
+        </span>
       </div>
 
       <textarea v-model="inputText" ref="textInput" placeholder="#ここに文章を入力してください。" @click="handleParaphraseBox" autofocus class="text-input"></textarea>
@@ -122,7 +129,9 @@
         <div v-for="paraphrase in activeParaphrases" class="paraphrase">
           <div class="paraphrase-title">{{paraphrase.title}}</div>
           <div class="paraphrase-content">
-            <div v-for="(candidate, i) in paraphrase.candidates" @click="applyRestatement(i)" class="candidate">{{candidate}}</div>
+            <div v-for="(candidate, i) in paraphrase.candidates" @click="applyRestatement(i)" class="candidate">
+              <span v-if="isPC">{{(candidate.index + 1).toString(36)}}</span><span>> {{candidate.text}}</span>
+            </div>
           </div>
         </div>
       </div>
